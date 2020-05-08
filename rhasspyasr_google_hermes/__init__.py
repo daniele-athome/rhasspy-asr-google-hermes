@@ -36,9 +36,6 @@ class SessionInfo:
     num_wav_bytes: int = 0
     audio_buffer: typing.Optional[bytes] = None
 
-    # Custom transcriber for filtered intents
-    transcriber: typing.Optional[Transcriber] = None
-
 
 # -----------------------------------------------------------------------------
 
@@ -82,7 +79,6 @@ class AsrHermesMqtt(HermesClient):
         )
 
         self.transcriber = transcriber
-        self.transcriber: typing.Optional[Transcriber] = None
 
         # True if ASR system is enabled
         self.enabled = enabled
@@ -170,7 +166,6 @@ class AsrHermesMqtt(HermesClient):
                     yield (
                         await self.transcribe(
                             wav_bytes,
-                            transcriber=session.transcriber,
                             site_id=message.site_id,
                             session_id=message.session_id,
                         )
@@ -247,7 +242,6 @@ class AsrHermesMqtt(HermesClient):
                         yield (
                             await self.transcribe(
                                 wav_bytes,
-                                transcriber=session.transcriber,
                                 site_id=site_id,
                                 session_id=target_id,
                             )
@@ -280,14 +274,11 @@ class AsrHermesMqtt(HermesClient):
             self,
             wav_bytes: bytes,
             site_id: str,
-            transcriber: typing.Optional[Transcriber] = None,
             session_id: typing.Optional[str] = None,
     ) -> AsrTextCaptured:
         """Transcribe audio data and publish captured text."""
-        assert self.transcriber, "No transcriber"
-
         _LOGGER.debug("Transcribing %s byte(s) of audio data", len(wav_bytes))
-        transcription = transcriber.transcribe_wav(wav_bytes)
+        transcription = self.transcriber.transcribe_wav(wav_bytes)
         if transcription:
             _LOGGER.debug(transcription)
             asr_tokens: typing.Optional[typing.List[typing.List[AsrToken]]] = None
