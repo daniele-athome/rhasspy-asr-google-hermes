@@ -1,0 +1,3 @@
+https://github.com/rhasspy/rhasspy-asr-google/archive/master.tar.gz
+https://github.com/rhasspy/rhasspy-silence/archive/master.tar.gz
+https://github.com/rhasspy/rhasspy-hermes/archive/master.tar.gz

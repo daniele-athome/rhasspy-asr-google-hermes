@@ -1,0 +1,9 @@
+*.iml
+.venv/
+dist/
+build/
+*.egg-info/
+__pycache__/
+.mypy_cache/
+.vscode/
+download/
