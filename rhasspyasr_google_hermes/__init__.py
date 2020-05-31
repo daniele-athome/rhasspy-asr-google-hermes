@@ -13,10 +13,12 @@ from rhasspyhermes.asr import (
     AsrToggleOff,
     AsrToggleOn,
     AsrToggleReason,
+    AsrTrain,
+    AsrTrainSuccess,
 )
 from rhasspyhermes.audioserver import AudioFrame, AudioSessionFrame
 from rhasspyhermes.base import Message
-from rhasspyhermes.client import GeneratorType, HermesClient
+from rhasspyhermes.client import GeneratorType, HermesClient, TopicArgs
 from rhasspyhermes.nlu import AsrToken, AsrTokenTime
 from rhasspysilence import VoiceCommandRecorder, VoiceCommandResult, WebRtcVadRecorder
 
@@ -76,6 +78,7 @@ class AsrHermesMqtt(HermesClient):
             AsrStopListening,
             AudioFrame,
             AudioSessionFrame,
+            AsrTrain,
         )
 
         self.transcriber = transcriber
@@ -323,6 +326,19 @@ class AsrHermesMqtt(HermesClient):
         """Delete any temporary files."""
         pass
 
+    async def handle_train(
+        self, train: AsrTrain, site_id: str = "default"
+    ) -> typing.AsyncIterable[
+        typing.Union[typing.Tuple[AsrTrainSuccess, TopicArgs], AsrError]
+    ]:
+        """Re-trains ASR system
+
+        This is basically a noop function as training is done by Google.
+        Rhasspy requires a training handler though.
+        """
+
+        yield (AsrTrainSuccess(id=train.id), {"site_id": site_id})
+
     # -------------------------------------------------------------------------
 
     async def on_message_blocking(
@@ -383,5 +399,10 @@ class AsrHermesMqtt(HermesClient):
             # hermes/asr/stopListening
             async for stop_result in self.stop_listening(message):
                 yield stop_result
+        elif isinstance(message, AsrTrain):
+            # rhasspy/asr/<site_id>/train
+            assert site_id, "Missing site_id"
+            async for train_result in self.handle_train(message, site_id=site_id):
+                yield train_result
         else:
             _LOGGER.warning("Unexpected message: %s", message)
