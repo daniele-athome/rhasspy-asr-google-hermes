@@ -171,6 +171,7 @@ class AsrHermesMqtt(HermesClient):
                             wav_bytes,
                             site_id=message.site_id,
                             session_id=message.session_id,
+                            wakeword_id=session.start_listening.wakeword_id
                         )
                     )
 
@@ -278,6 +279,7 @@ class AsrHermesMqtt(HermesClient):
             wav_bytes: bytes,
             site_id: str,
             session_id: typing.Optional[str] = None,
+            wakeword_id: typing.Optional[str] = None,
     ) -> AsrTextCaptured:
         """Transcribe audio data and publish captured text."""
         _LOGGER.debug("Transcribing %s byte(s) of audio data", len(wav_bytes))
@@ -315,11 +317,12 @@ class AsrHermesMqtt(HermesClient):
                 site_id=site_id,
                 session_id=session_id,
                 asr_tokens=asr_tokens,
+                wakeword_id=wakeword_id
             )
 
         _LOGGER.warning("Received empty transcription")
         return AsrTextCaptured(
-            text="", likelihood=0, seconds=0, site_id=site_id, session_id=session_id
+            text="", likelihood=0, seconds=0, site_id=site_id, session_id=session_id, wakeword_id=wakeword_id
         )
 
     def cleanup(self):
