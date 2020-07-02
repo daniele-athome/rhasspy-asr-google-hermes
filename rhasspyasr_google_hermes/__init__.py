@@ -248,6 +248,7 @@ class AsrHermesMqtt(HermesClient):
                                 wav_bytes,
                                 site_id=site_id,
                                 session_id=target_id,
+                                wakeword_id=session.start_listening.wakeword_id
                             )
                         )
 
